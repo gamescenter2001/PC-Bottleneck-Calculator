@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PC Bottleneck Calculator</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--glass:rgba(255,255,255,.22);--glass2:rgba(255,255,255,.34);--bd:rgba(255,255,255,.55);--tx:#0b2a4a;--tx2:#1d4b7a;--ac:#0a84ff}
+@media (prefers-color-scheme:dark){:root{--tx:#0b2a4a}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100vh;font-family:-apple-system,"SF Pro Text","Segoe UI",Tahoma,"Noto Sans Arabic",Arial,sans-serif;color:var(--tx);
+background:linear-gradient(160deg,#8fd0ff 0%,#5fb2f5 35%,#3f8fe0 70%,#7cc3ff 100%);background-attachment:fixed;overflow-x:hidden}
+.blob{position:fixed;border-radius:50%;filter:blur(60px);opacity:.55;z-index:0;animation:fl 14s ease-in-out infinite alternate}
+.b1{width:420px;height:420px;background:#dff3ff;top:-120px;left:-100px}
+.b2{width:480px;height:480px;background:#2f7fe6;bottom:-160px;right:-120px;animation-delay:-5s}
+.b3{width:300px;height:300px;background:#a9e0ff;top:40%;left:50%;animation-delay:-9s}
+@keyframes fl{to{transform:translate(60px,40px) scale(1.15)}}
+.wrap{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:18px 16px 40px}
+.glass{background:var(--glass);backdrop-filter:blur(22px) saturate(160%);-webkit-backdrop-filter:blur(22px) saturate(160%);
+border:1px solid var(--bd);border-radius:24px;box-shadow:0 10px 40px rgba(10,60,140,.22),inset 0 1px 0 rgba(255,255,255,.7)}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:10px}
+.top h1{font-size:clamp(18px,4.6vw,26px);margin:0;font-weight:700;text-shadow:0 1px 0 rgba(255,255,255,.5)}
+.tools{display:flex;gap:8px}
+.chip{border:1px solid var(--bd);background:var(--glass2);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);color:var(--tx);
+border-radius:999px;padding:9px 16px;font:600 14px inherit;font-family:inherit;cursor:pointer;box-shadow:0 4px 14px rgba(10,60,140,.18);transition:.2s}
+.chip:active{transform:scale(.95)}
+.card{padding:20px}
+.sub{margin:0 0 18px;color:var(--tx2);font-size:14px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:560px){.grid{grid-template-columns:1fr}}
+label.l{display:block;font-size:13px;font-weight:700;margin:0 0 6px;color:var(--tx2)}
+.dd{position:relative}
+.dd-btn,.sel{width:100%;text-align:start;padding:13px 14px;border-radius:14px;border:1px solid var(--bd);background:rgba(255,255,255,.45);color:var(--tx);
+font:600 15px inherit;font-family:inherit;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.dd-btn span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dd-btn::after{content:"▾";opacity:.6}
+.dd.open{z-index:20}
+.dd-panel{display:none;position:absolute;inset-inline:0;top:calc(100% + 6px);padding:8px;border-radius:16px;background:rgba(235,246,255,.88);
+backdrop-filter:blur(26px);-webkit-backdrop-filter:blur(26px);border:1px solid var(--bd);box-shadow:0 16px 40px rgba(10,60,140,.3)}
+.dd.open .dd-panel{display:block}
+.dd-panel input{width:100%;padding:11px 12px;border-radius:11px;border:1px solid rgba(10,100,200,.25);background:rgba(255,255,255,.8);font:15px inherit;font-family:inherit;color:var(--tx);outline:none}
+.dd-panel ul{list-style:none;margin:8px 0 0;padding:0;max-height:240px;overflow-y:auto}
+.dd-panel li{padding:10px 12px;border-radius:10px;cursor:pointer;font-size:14px;display:flex;justify-content:space-between;gap:8px}
+.dd-panel li:hover{background:rgba(10,132,255,.16)}
+.dd-panel li.g{font-size:11px;font-weight:800;opacity:.6;cursor:default;letter-spacing:.5px;background:none!important}
+.dd-panel li small{opacity:.55;direction:ltr}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{flex:1;min-width:90px;padding:12px 8px;border-radius:14px;border:1px solid var(--bd);background:rgba(255,255,255,.35);color:var(--tx);font:600 14px inherit;font-family:inherit;cursor:pointer}
+.seg button.on{background:linear-gradient(180deg,#4fb0ff,#0a84ff);color:#fff;border-color:#9dd3ff;box-shadow:0 6px 16px rgba(10,132,255,.4)}
+.go{display:block;width:100%;margin-top:22px;padding:17px;border:0;border-radius:18px;font:700 18px inherit;font-family:inherit;color:#fff;cursor:pointer;
+background:linear-gradient(180deg,#5bbcff,#0a74f0);box-shadow:0 10px 28px rgba(10,116,240,.5),inset 0 1px 0 rgba(255,255,255,.6);transition:.2s}
+.go:active{transform:scale(.98)}
+.err{color:#b3261e;font-weight:700;text-align:center;margin-top:12px;min-height:20px;font-size:14px}
+.ov{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(8,35,80,.5);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.ov.show{display:flex;animation:fi .25s}
+@keyframes fi{from{opacity:0}}
+.modal{width:100%;max-width:440px;padding:26px;text-align:center;animation:pop .35s cubic-bezier(.2,1.3,.4,1);max-height:92vh;overflow-y:auto;background:rgba(255,255,255,.55)}
+@keyframes pop{from{transform:scale(.8);opacity:0}}
+.pct{font-size:64px;font-weight:800;line-height:1}
+.verdict{display:inline-block;margin:10px 0 16px;padding:7px 16px;border-radius:999px;font-weight:700;font-size:14px;color:#fff}
+.bar{height:14px;border-radius:99px;background:linear-gradient(90deg,#34c759 0 25%,#ffcc00 25% 50%,#ff3b30 50%);position:relative;margin:6px 0 4px;box-shadow:inset 0 1px 3px rgba(0,0,0,.2)}
+.bar i{position:absolute;top:-5px;width:6px;height:24px;border-radius:4px;background:#fff;border:2px solid var(--tx);transition:inset-inline-start .8s;inset-inline-start:0;transform:translateX(-50%)}
+[dir=rtl] .bar i{transform:translateX(50%)}
+.sc{display:flex;justify-content:space-between;font-size:11px;opacity:.7;margin-bottom:14px}
+.tip{background:rgba(255,255,255,.55);border-radius:16px;padding:14px;text-align:start;font-size:14px;line-height:1.7;margin-bottom:18px}
+.tip b{display:block;margin-bottom:4px}
+.note{font-size:11px;color:var(--tx2);text-align:center;margin-top:16px;opacity:.85}
+</style>
+</head>
+<body>
+<div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+<div class="wrap">
+ <div class="top">
+  <h1 data-i="title"></h1>
+  <div class="tools"><button class="chip" id="snd">🔊</button><button class="chip" id="lang">EN</button></div>
+ </div>
+ <div class="glass card">
+  <p class="sub" data-i="sub"></p>
+  <div class="grid">
+   <div><label class="l" data-i="cpu"></label><div class="dd" id="ddCpu"></div></div>
+   <div><label class="l" data-i="gpu"></label><div class="dd" id="ddGpu"></div></div>
+  </div>
+  <label class="l" style="margin-top:18px" data-i="res"></label>
+  <div class="seg" id="segRes"></div>
+  <label class="l" style="margin-top:18px" data-i="use"></label>
+  <div class="seg" id="segUse"></div>
+  <button class="go" id="go" data-i="calc"></button>
+  <div class="err" id="err"></div>
+ </div>
+ <div class="note" data-i="note"></div>
+</div>
+<div class="ov" id="ov"><div class="glass modal" id="modal"></div></div>
+
+<script>
+/* ===== Hardware DB: name:score (relative performance index, 4090 ≈ 110, 14900K ≈ 104) ===== */
+/* name:score:releaseYear. CPU score = 1080p gaming index (7800X3D=100). GPU score = raster index (RTX 4090=100). */
+const CPU={
+"Intel":"Core i5-4590:28:2014;Core i7-4790K:35:2014;Core i5-8400:42:2017;Core i7-8700K:50:2017;Core i5-9400F:43:2019;Core i9-9900K:56:2018;Core i3-10100F:45:2020;Core i5-10400F:50:2020;Core i7-10700K:58:2020;Core i5-11400F:55:2021;Core i3-12100F:55:2022;Core i5-12400F:60:2022;Core i7-12700K:72:2021;Core i9-12900K:78:2021;Core i5-13400F:64:2023;Core i5-13600K:79:2022;Core i7-13700K:84:2022;Core i9-13900K:88:2022;Core i5-14400F:65:2024;Core i5-14600K:80:2023;Core i7-14700K:87:2023;Core i9-14900K:90:2023;Core Ultra 5 245K:83:2024;Core Ultra 7 265K:90:2024;Core Ultra 9 285K:92:2024",
+"AMD Ryzen":"Ryzen 3 3100:36:2020;Ryzen 5 1600:33:2017;Ryzen 5 2600:40:2018;Ryzen 5 3600:48:2019;Ryzen 5 5500:52:2022;Ryzen 5 5600:60:2022;Ryzen 5 5600X:62:2020;Ryzen 7 5700X3D:78:2024;Ryzen 7 5800X3D:82:2022;Ryzen 7 3700X:50:2019;Ryzen 7 5700X:64:2022;Ryzen 7 5800X:66:2020;Ryzen 9 5900X:68:2020;Ryzen 9 5950X:69:2020;Ryzen 5 7500F:80:2023;Ryzen 5 7600:83:2023;Ryzen 5 7600X:85:2022;Ryzen 7 7700X:90:2022;Ryzen 7 7800X3D:100:2023;Ryzen 9 7900X:90:2022;Ryzen 9 7950X3D:98:2023;Ryzen 5 9600X:91:2024;Ryzen 7 9700X:94:2024;Ryzen 7 9800X3D:120:2024;Ryzen 9 9900X:95:2024;Ryzen 9 9950X:97:2024"};
+const GPU={
+"NVIDIA GeForce":"GTX 750 Ti:4:2014;GTX 960:7:2015;GTX 970:12:2014;GTX 980 Ti:20:2015;GTX 1050 Ti:9:2016;GTX 1060 6GB:15:2016;GTX 1070:22:2016;GTX 1080:28:2016;GTX 1080 Ti:36:2017;GTX 1650:11:2019;GTX 1650 Super:15:2019;GTX 1660:17:2019;GTX 1660 Super:20:2019;GTX 1660 Ti:21:2019;RTX 2060:24:2019;RTX 2060 Super:28:2019;RTX 2070 Super:33:2019;RTX 2080 Ti:42:2018;RTX 3050 8GB:21:2022;RTX 3060 12GB:31:2021;RTX 3060 Ti:40:2020;RTX 3070:46:2020;RTX 3070 Ti:50:2021;RTX 3080:58:2020;RTX 3080 Ti:65:2021;RTX 3090:68:2020;RTX 4060:37:2023;RTX 4060 Ti:44:2023;RTX 4070:55:2023;RTX 4070 Super:63:2024;RTX 4070 Ti Super:73:2024;RTX 4080:80:2022;RTX 4080 Super:83:2024;RTX 4090:100:2022;RTX 5070:66:2025;RTX 5070 Ti:82:2025;RTX 5080:90:2025;RTX 5090:130:2025",
+"AMD Radeon":"RX 570:11:2017;RX 580 8GB:14:2017;RX 590:16:2018;RX 5500 XT:14:2019;RX 5600 XT:22:2020;RX 5700:26:2019;RX 5700 XT:30:2019;RX 6500 XT:14:2022;RX 6600:30:2021;RX 6600 XT:35:2021;RX 6650 XT:37:2022;RX 6700 XT:43:2021;RX 6750 XT:46:2022;RX 6800:56:2020;RX 6800 XT:64:2020;RX 6900 XT:70:2020;RX 6950 XT:74:2022;RX 7600:36:2023;RX 7600 XT:42:2023;RX 7700 XT:52:2023;RX 7800 XT:62:2023;RX 7900 GRE:68:2024;RX 7900 XT:74:2022;RX 7900 XTX:85:2022;RX 8800 XT:80:2025"};
+const parse=o=>{const a=[];for(const g in o)o[g].split(";").forEach(s=>{const p=s.split(":");a.push({g,n:(g==="Intel"?"Intel ":g==="AMD Ryzen"?"AMD ":g.startsWith("NVIDIA")?"NVIDIA ":"AMD ")+p[0],s:+p[1],y:+p[2]})});return a};
+const CPUS=parse(CPU),GPUS=parse(GPU);
+
+/* ===== i18n ===== */
+const T={ar:{title:"حاسبة عنق الزجاجة للحاسوب",sub:"اختر مواصفات جهازك ثم اضغط زر الفحص.",cpu:"المعالج (CPU)",gpu:"كرت الشاشة (GPU)",res:"دقة الشاشة",use:"نوع الاستخدام",
+calc:"كشف عنق الزجاجة",pickCpu:"اختر المعالج…",pickGpu:"اختر كرت الشاشة…",search:"ابحث…",none:"لا نتائج",err:"من فضلك اختر المعالج وكرت الشاشة أولاً.",
+r1:"1080p FHD",r2:"1440p 2K",r3:"4K UHD",u1:"ألعاب ثقيلة AAA",u2:"ألعاب تنافسية FPS",u3:"مونتاج ورندر",close:"إغلاق",
+cpuB:"عنق زجاجة في المعالج",gpuB:"عنق زجاجة في كرت الشاشة",opt:"توافق مثالي",
+tOpt:"التركيبة متوازنة جداً. لا حاجة لأي ترقية في الوقت الحالي.",
+tCpu:"المعالج لا يستطيع مجاراة كرت الشاشة. ينصح بترقية المعالج إلى:",tGpu:"كرت الشاشة هو الحلقة الأضعف. ينصح بترقية الكرت إلى:",
+top:"قطعتك من الفئة العليا ولا توجد ترقية أفضل في القاعدة.",tipT:"نصيحة تقنية",
+bn:"النسبة",note:"النتائج تقديرية مبنية على مؤشرات أداء نسبية وليست قياساً فعلياً."},
+en:{title:"PC Bottleneck Calculator",sub:"Pick your hardware, then press the check button.",cpu:"Processor (CPU)",gpu:"Graphics Card (GPU)",res:"Display Resolution",use:"Usage Type",
+calc:"Calculate Bottleneck",pickCpu:"Select CPU…",pickGpu:"Select GPU…",search:"Search…",none:"No results",err:"Please select a CPU and a GPU first.",
+r1:"1080p FHD",r2:"1440p 2K",r3:"4K UHD",u1:"Heavy AAA Gaming",u2:"Competitive FPS",u3:"Editing & Rendering",close:"Close",
+cpuB:"CPU Bottleneck",gpuB:"GPU Bottleneck",opt:"Optimal Match",
+tOpt:"This pairing is very well balanced. No upgrade needed right now.",
+tCpu:"Your CPU cannot keep up with the GPU. Consider upgrading the CPU to:",tGpu:"Your GPU is the weakest link. Consider upgrading the GPU to:",
+top:"Your part is already top tier; no better upgrade in the database.",tipT:"Technical tip",
+bn:"Bottleneck",note:"Results are estimates based on relative performance indices, not real measurements."}};
+let L="ar",muted=false,cpu=null,gpu=null,res=0,use=0;
+const t=k=>T[L][k];
+
+/* ===== Audio ===== */
+let ac;
+function tone(f,d,type="sine",v=.07,f2,delay=0){if(muted)return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();
+const o=ac.createOscillator(),g=ac.createGain(),s=ac.currentTime+delay;o.type=type;o.frequency.setValueAtTime(f,s);
+if(f2)o.frequency.exponentialRampToValueAtTime(f2,s+d);g.gain.setValueAtTime(0,s);g.gain.linearRampToValueAtTime(v,s+.008);
+g.gain.exponentialRampToValueAtTime(.0001,s+d);o.connect(g).connect(ac.destination);o.start(s);o.stop(s+d+.02)}catch(e){}}
+const sClick=()=>{tone(1400,.07,"sine",.06,900);tone(2800,.04,"triangle",.02,1800)};
+const sSel=()=>{tone(1100,.09,"sine",.06,1600)};
+const sOpen=()=>{tone(660,.4,"sine",.06);tone(880,.4,"sine",.06,0,.1);tone(1320,.5,"sine",.05,0,.2)};
+const sClose=()=>tone(700,.18,"sine",.06,350);
+
+/* ===== Searchable dropdown ===== */
+const dds=[];
+function makeDD(el,items,onPick,phKey){
+ el.innerHTML=`<button type="button" class="dd-btn"><span></span></button><div class="dd-panel"><input type="text"><ul></ul></div>`;
+ const btn=el.querySelector("button"),sp=btn.firstChild,inp=el.querySelector("input"),ul=el.querySelector("ul");
+ const o={el,sel:null,phKey,refresh(){sp.textContent=o.sel?o.sel.n:t(phKey);inp.placeholder=t("search")}};
+ function render(){const q=inp.value.trim().toLowerCase();let h="",last="",c=0;
+  items.forEach((x,i)=>{if(q&&!x.n.toLowerCase().includes(q))return;c++;if(x.g!==last){last=x.g;h+=`<li class="g">${x.g.toUpperCase()}</li>`}
+  h+=`<li data-i="${i}"><span>${x.n}</span><small>${x.s}</small></li>`});ul.innerHTML=h||`<li class="g">${t("none")}</li>`}
+ function close(){el.classList.remove("open")}
+ btn.onclick=e=>{e.stopPropagation();const was=el.classList.contains("open");dds.forEach(d=>d.el.classList.remove("open"));
+  if(!was){el.classList.add("open");inp.value="";render();sClick();setTimeout(()=>inp.focus(),50)}};
+ inp.oninput=render;inp.onclick=e=>e.stopPropagation();
+ ul.onclick=e=>{const li=e.target.closest("li[data-i]");if(!li)return;o.sel=items[+li.dataset.i];o.refresh();close();sSel();onPick(o.sel)};
+ dds.push(o);o.refresh();return o;
+}
+document.addEventListener("click",()=>dds.forEach(d=>d.el.classList.remove("open")));
+const dCpu=makeDD(document.getElementById("ddCpu"),CPUS,x=>cpu=x,"pickCpu");
+const dGpu=makeDD(document.getElementById("ddGpu"),GPUS,x=>gpu=x,"pickGpu");
+
+/* ===== Segments ===== */
+function seg(id,keys,get,set){const b=document.getElementById(id);
+ b.innerHTML=keys.map((k,i)=>`<button type="button" data-i="${i}" class="${get()===i?"on":""}">${t(k)}</button>`).join("");
+ b.onclick=e=>{const x=e.target.closest("button");if(!x)return;set(+x.dataset.i);sClick();seg(id,keys,get,set)}}
+function segs(){seg("segRes",["r1","r2","r3"],()=>res,v=>res=v);seg("segUse",["u1","u2","u3"],()=>use,v=>use=v)}
+
+/* ===== Algorithm ===== */
+/* GPU index is converted to CPU scale with K. At 1080p the CPU is stressed most; at 1440p/4K load shifts to the GPU. */
+const K=1.2,RES=[1,1.4,2.2],GL=[1,.7,.85],CM=[1,1,1.1];
+function calc(c,g){
+ const cF=c*CM[use],gF=g*K/(RES[res]*GL[use]);
+ const hi=Math.max(cF,gF),lo=Math.min(cF,gF),raw=(hi-lo)/hi;
+ const side=cF<gF?"cpu":"gpu";
+ /* A strong CPU with a weaker GPU is a normal GPU-bound system, so it gets a wide tolerance (50%). A weak CPU gets a tight one (12%). */
+ const tol=side==="gpu"?.5:.12,sl=side==="gpu"?80:100;
+ let p=raw<=tol?raw/tol*6:6+(raw-tol)*sl;
+ p=Math.min(99,p);
+ return{p,side:p<8?"opt":side};
+}
+/* Upgrades must be newer (same year or later, and never before 2022) and clearly stronger than the current part. */
+function upgrade(side){
+ const cur=side==="cpu"?cpu:gpu,list=side==="cpu"?CPUS:GPUS,minY=Math.max(cur.y,2022);
+ const c=list.filter(x=>x.y>=minY&&x.s>=cur.s*1.2).sort((a,b)=>a.s-b.s);
+ if(!c.length)return null;
+ const P=x=>side==="cpu"?calc(x.s,gpu.s).p:calc(cpu.s,x.s).p;
+ return c.find(x=>P(x)<8)||c.reduce((m,x)=>P(x)<P(m)?x:m,c[0]);
+}
+
+/* ===== Modal ===== */
+const ov=document.getElementById("ov"),modal=document.getElementById("modal");
+document.getElementById("go").onclick=()=>{sClick();const er=document.getElementById("err");
+ if(!cpu||!gpu){er.textContent=t("err");return}er.textContent="";showResult()};
+function showResult(){
+ const r=calc(cpu.s,gpu.s),p=r.p,col=p<10?"#34c759":p<20?"#e6a800":"#ff3b30";
+ let tip=t("tOpt");
+ if(r.side!=="opt"){const u=upgrade(r.side);tip=u?`${t(r.side==="cpu"?"tCpu":"tGpu")} <b style="display:inline;color:#0a64d0">${u.n}</b>`:t("top")}
+ const vt=r.side==="opt"?t("opt"):t(r.side==="cpu"?"cpuB":"gpuB");
+ modal.innerHTML=`<div style="font-size:13px;opacity:.75;margin-bottom:6px">${cpu.n} + ${gpu.n}</div>
+ <div class="pct" style="color:${col}">${p.toFixed(1)}%</div>
+ <div class="verdict" style="background:${col}">${vt}</div>
+ <div class="bar"><i style="inset-inline-start:0"></i></div>
+ <div class="sc"><span>0%</span><span>10%</span><span>20%</span><span>40%+</span></div>
+ <div class="tip"><b>💡 ${t("tipT")}</b>${tip}</div>
+ <button class="chip go" style="margin:0;font-size:16px;padding:13px" id="cl">${t("close")}</button>`;
+ ov.classList.add("show");sOpen();
+ requestAnimationFrame(()=>requestAnimationFrame(()=>modal.querySelector(".bar i").style.insetInlineStart=Math.min(p/40*100,100)+"%"));
+ document.getElementById("cl").onclick=closeM;
+}
+function closeM(){if(!ov.classList.contains("show"))return;ov.classList.remove("show");sClose()}
+ov.onclick=e=>{if(e.target===ov)closeM()};
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeM()});
+
+/* ===== Lang / sound / init ===== */
+function applyLang(){const h=document.documentElement;h.lang=L;h.dir=L==="ar"?"rtl":"ltr";
+ document.querySelectorAll("[data-i]").forEach(e=>{if(!e.closest(".seg"))e.textContent=t(e.dataset.i)});
+ document.getElementById("lang").textContent=L==="ar"?"EN":"عربي";dds.forEach(d=>d.refresh());segs();
+ document.getElementById("err").textContent="";if(ov.classList.contains("show"))showResult()}
+document.getElementById("lang").onclick=()=>{L=L==="ar"?"en":"ar";sClick();applyLang()};
+document.getElementById("snd").onclick=e=>{muted=!muted;e.currentTarget.textContent=muted?"🔇":"🔊";if(!muted)sClick()};
+applyLang();
+</script>
+</body>
+</html>
